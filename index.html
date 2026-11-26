@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ chia tiền nhóm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-slate-50 min-h-screen text-slate-800">
+
+    <header class="bg-white border-b">
+        <div class="max-w-5xl mx-auto px-5 py-5 flex items-center gap-3">
+            <div class="bg-amber-100 text-amber-600 w-11 h-11 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-users text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold">Chia Tiền Nhóm</h1>
+                <p class="text-sm text-gray-500">Quản lý chi phí chung dễ dàng</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-5 py-8">
+
+        <div class="mb-7">
+            <h2 class="text-2xl font-bold mb-2">Quản lý chi tiêu nhóm</h2>
+            <p class="text-gray-500">Thêm thành viên, ghi lại chi phí và để công cụ tính toán giúp bạn.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
+            <div class="bg-white p-5 rounded-2xl border">
+                <p class="text-sm text-gray-500 mb-2">Tổng chi phí</p>
+                <h3 id="totalExpense" class="text-2xl font-bold text-amber-600">0 ₫</h3>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border">
+                <p class="text-sm text-gray-500 mb-2">Thành viên</p>
+                <h3 id="totalMembers" class="text-2xl font-bold">0</h3>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border">
+                <p class="text-sm text-gray-500 mb-2">Khoản chi</p>
+                <h3 id="totalTransactions" class="text-2xl font-bold">0</h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+            <section class="bg-white border rounded-2xl p-6">
+                <h3 class="font-bold text-lg mb-4">
+                    <i class="fa-solid fa-user-plus text-amber-500 mr-2"></i>
+                    Thành viên nhóm
+                </h3>
+
+                <div class="flex gap-2 mb-4">
+                    <input id="memberName" type="text" placeholder="Nhập tên thành viên..."
+                        class="flex-1 min-w-0 border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400">
+                    <button onclick="addMember()"
+                        class="bg-amber-500 hover:bg-amber-600 text-white px-4 rounded-xl font-semibold">
+                        Thêm
+                    </button>
+                </div>
+
+                <div id="memberList" class="space-y-2">
+                    <p class="text-gray-400 text-sm text-center py-3">Chưa có thành viên nào.</p>
+                </div>
+            </section>
+
+            <section class="bg-white border rounded-2xl p-6">
+                <h3 class="font-bold text-lg mb-4">
+                    <i class="fa-solid fa-money-bill-wave text-amber-500 mr-2"></i>
+                    Thêm khoản chi
+                </h3>
+
+                <div class="space-y-3">
+                    <input id="expenseName" type="text" placeholder="Tên khoản chi (Ví dụ: Ăn uống)"
+                        class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400">
+
+                    <input id="expenseAmount" type="number" min="1" placeholder="Số tiền (VNĐ)"
+                        class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400">
+
+                    <select id="expensePayer"
+                        class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400">
+                        <option value="">Chọn người thanh toán</option>
+                    </select>
+
+                    <button onclick="addExpense()"
+                        class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-bold">
+                        <i class="fa-solid fa-plus mr-2"></i>Thêm khoản chi
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+        <section class="bg-white border rounded-2xl p-6 mb-6">
+            <div class="flex justify-between items-center mb-5 gap-3">
+                <h3 class="font-bold text-lg">
+                    <i class="fa-solid fa-receipt text-amber-500 mr-2"></i>
+                    Lịch sử chi tiêu
+                </h3>
+                <span id="expenseCount" class="text-sm text-gray-500">0 khoản chi</span>
+            </div>
+
+            <div id="expenseList" class="space-y-3">
+                <p class="text-center text-gray-400 py-6">Chưa có khoản chi nào.</p>
+            </div>
+        </section>
+
+        <section class="bg-white border rounded-2xl p-6 mb-6">
+            <h3 class="font-bold text-lg mb-5">
+                <i class="fa-solid fa-calculator text-amber-500 mr-2"></i>
+                Kết quả chia tiền
+            </h3>
+
+            <div id="splitResult">
+                <p class="text-center text-gray-400 py-6">Thêm thành viên và khoản chi để xem kết quả.</p>
+            </div>
+        </section>
+
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p class="text-sm text-gray-400">Chi phí được chia đều cho tất cả thành viên.</p>
+            <button onclick="resetData()"
+                class="border border-red-200 text-red-500 hover:bg-red-50 px-5 py-3 rounded-xl font-semibold">
+                <i class="fa-solid fa-trash mr-2"></i>Xóa tất cả dữ liệu
+            </button>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-7 text-sm text-gray-400">
+        © 2026 Công cụ chia tiền nhóm
+    </footer>
+
+    <script>
+        let members = JSON.parse(localStorage.getItem("split_members")) || [];
+        let expenses = JSON.parse(localStorage.getItem("split_expenses")) || [];
+
+        function saveData() {
+            localStorage.setItem("split_members", JSON.stringify(members));
+            localStorage.setItem("split_expenses", JSON.stringify(expenses));
+        }
+
+        function formatMoney(amount) {
+            return Math.round(amount).toLocaleString("vi-VN") + " ₫";
+        }
+
+        function addMember() {
+            const input = document.getElementById("memberName");
+            const name = input.value.trim();
+
+            if (!name) {
+                alert("Vui lòng nhập tên thành viên!");
+                return;
+            }
+
+            if (members.some(member => member.name.toLowerCase() === name.toLowerCase())) {
+                alert("Tên thành viên đã tồn tại!");
+                return;
+            }
+
+            members.push({
+                id: Date.now() + Math.random(),
+                name: name
+            });
+
+            input.value = "";
+            saveData();
+            renderAll();
+        }
+
+        function removeMember(id) {
+            if (expenses.some(expense => expense.payer === id)) {
+                alert("Không thể xóa thành viên đã thanh toán khoản chi. Hãy xóa khoản chi liên quan trước!");
+                return;
+            }
+
+            if (!confirm("Bạn có chắc muốn xóa thành viên này?")) return;
+
+            members = members.filter(member => member.id !== id);
+            saveData();
+            renderAll();
+        }
+
+        function addExpense() {
+            const name = document.getElementById("expenseName").value.trim();
+            const amount = Number(document.getElementById("expenseAmount").value);
+            const payer = document.getElementById("expensePayer").value;
+
+            if (!members.length) {
+                alert("Vui lòng thêm thành viên trước!");
+                return;
+            }
+
+            if (!name || !amount || amount <= 0 || !Number.isFinite(amount)) {
+                alert("Vui lòng nhập tên khoản chi và số tiền hợp lệ!");
+                return;
+            }
+
+            if (!payer || !members.some(member => String(member.id) === payer)) {
+                alert("Vui lòng chọn người thanh toán!");
+                return;
+            }
+
+            expenses.push({
+                id: Date.now() + Math.random(),
+                name: name,
+                amount: amount,
+                payer: Number(payer)
+            });
+
+            document.getElementById("expenseName").value = "";
+            document.getElementById("expenseAmount").value = "";
+
+            saveData();
+            renderAll();
+        }
+
+        function removeExpense(id) {
+            if (!confirm("Bạn có chắc muốn xóa khoản chi này?")) return;
+
+            expenses = expenses.filter(expense => expense.id !== id);
+            saveData();
+            renderAll();
+        }
+
+        function getBalances() {
+            const balances = {};
+
+            members.forEach(member => {
+                balances[member.id] = {
+                    name: member.name,
+                    paid: 0,
+                    share: 0,
+                    balance: 0
+                };
+            });
+
+            expenses.forEach(expense => {
+                if (!balances[expense.payer]) return;
+
+                const share = expense.amount / members.length;
+
+                balances[expense.payer].paid += expense.amount;
+
+                members.forEach(member => {
+                    balances[member.id].share += share;
+                });
+            });
+
+            Object.values(balances).forEach(person => {
+                person.balance = person.paid - person.share;
+            });
+
+            return balances;
+        }
+
+        function calculateSettlement(balances) {
+            const creditors = [];
+            const debtors = [];
+
+            Object.entries(balances).forEach(([id, person]) => {
+                const balance = Math.round(person.balance);
+
+                if (balance > 0) {
+                    creditors.push({
+                        id,
+                        name: person.name,
+                        amount: balance
+                    });
+                } else if (balance < 0) {
+                    debtors.push({
+                        id,
+                        name: person.name,
+                        amount: -balance
+                    });
+                }
+            });
+
+            const results = [];
+
+            let i = 0;
+            let j = 0;
+
+            while (i < debtors.length && j < creditors.length) {
+                const amount = Math.min(debtors[i].amount, creditors[j].amount);
+
+                results.push({
+                    from: debtors[i].name,
+                    to: creditors[j].name,
+                    amount: amount
+                });
+
+                debtors[i].amount -= amount;
+                creditors[j].amount -= amount;
+
+                if (debtors[i].amount === 0) i++;
+                if (creditors[j].amount === 0) j++;
+            }
+
+            return results;
+        }
+
+        function renderMembers() {
+            const list = document.getElementById("memberList");
+            const select = document.getElementById("expensePayer");
+
+            list.innerHTML = members.length
+                ? members.map(member => `
+                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
+                        <span class="font-medium">
+                            <i class="fa-solid fa-user text-amber-500 mr-2"></i>
+                            ${escapeHTML(member.name)}
+                        </span>
+                        <button onclick="removeMember(${member.id})"
+                            class="text-red-400 hover:text-red-600 px-2">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `).join("")
+                : '<p class="text-gray-400 text-sm text-center py-3">Chưa có thành viên nào.</p>';
+
+            const current = select.value;
+
+            select.innerHTML = '<option value="">Chọn người thanh toán</option>' +
+                members.map(member =>
+                    `<option value="${member.id}">${escapeHTML(member.name)}</option>`
+                ).join("");
+
+            if (members.some(member => String(member.id) === current)) {
+                select.value = current;
+            }
+        }
+
+        function renderExpenses() {
+            const list = document.getElementById("expenseList");
+
+            list.innerHTML = expenses.length
+                ? expenses.map(expense => {
+                    const payer = members.find(member => member.id === expense.payer);
+
+                    return `
+                        <div class="flex justify-between items-center gap-3 border-b last:border-0 pb-3">
+                            <div class="min-w-0">
+                                <p class="font-semibold">${escapeHTML(expense.name)}</p>
+                                <p class="text-sm text-gray-500">
+                                    ${payer ? escapeHTML(payer.name) : "Không xác định"} đã thanh toán
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <span class="font-bold text-amber-600">${formatMoney(expense.amount)}</span>
+                                <button onclick="removeExpense(${expense.id})"
+                                    class="text-red-400 hover:text-red-600">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join("")
+                : '<p class="text-center text-gray-400 py-6">Chưa có khoản chi nào.</p>';
+
+            document.getElementById("expenseCount").textContent = expenses.length + " khoản chi";
+        }
+
+        function renderResults() {
+            const result = document.getElementById("splitResult");
+
+            if (!members.length || !expenses.length) {
+                result.innerHTML = '<p class="text-center text-gray-400 py-6">Thêm thành viên và khoản chi để xem kết quả.</p>';
+                return;
+            }
+
+            const balances = getBalances();
+            const settlement = calculateSettlement(balances);
+
+            const memberHTML = Object.values(balances).map(person => {
+                const positive = person.balance >= 0;
+
+                return `
+                    <div class="flex justify-between items-center gap-3 py-3 border-b last:border-0">
+                        <div>
+                            <p class="font-semibold">${escapeHTML(person.name)}</p>
+                            <p class="text-xs text-gray-500">Đã trả: ${formatMoney(person.paid)}</p>
+                            <p class="text-xs text-gray-500">Phải chịu: ${formatMoney(person.share)}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold ${positive ? 'text-green-600' : 'text-red-500'}">
+                                ${positive ? '+' : '-'}${formatMoney(Math.abs(person.balance))}
+                            </p>
+                            <p class="text-xs ${positive ? 'text-green-600' : 'text-red-500'}">
+                                ${positive ? 'Được nhận lại' : 'Cần thanh toán'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            const settlementHTML = settlement.length
+                ? settlement.map(item => `
+                    <div class="bg-amber-50 rounded-xl p-4 mb-2">
+                        <p class="font-medium">
+                            <span class="text-red-500">${escapeHTML(item.from)}</span>
+                            <i class="fa-solid fa-arrow-right text-gray-400 mx-2"></i>
+                            <span class="text-green-600">${escapeHTML(item.to)}</span>
+                        </p>
+                        <p class="font-bold text-amber-600 mt-1">${formatMoney(item.amount)}</p>
+                    </div>
+                `).join("")
+                : '<p class="text-green-600 text-sm">Mọi người đã thanh toán cân bằng!</p>';
+
+            result.innerHTML = `
+                <div class="bg-slate-50 rounded-xl p-4 mb-5">
+                    <p class="text-sm text-gray-500">Trung bình mỗi người cần chịu</p>
+                    <p class="text-2xl font-bold text-amber-600">
+                        ${formatMoney(expenses.reduce((sum, item) => sum + item.amount, 0) / members.length)}
+                    </p>
+                </div>
+
+                <h4 class="font-semibold mb-2">Chi tiết từng thành viên</h4>
+                <div class="mb-6">${memberHTML}</div>
+
+                <h4 class="font-semibold mb-3">Các giao dịch cần thực hiện</h4>
+                ${settlementHTML}
+            `;
+        }
+
+        function renderAll() {
+            const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+            document.getElementById("totalExpense").textContent = formatMoney(total);
+            document.getElementById("totalMembers").textContent = members.length;
+            document.getElementById("totalTransactions").textContent = expenses.length;
+
+            renderMembers();
+            renderExpenses();
+            renderResults();
+        }
+
+        function escapeHTML(value) {
+            return String(value).replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            })[char]);
+        }
+
+        function resetData() {
+            if (!confirm("Bạn có chắc muốn xóa toàn bộ thành viên và khoản chi?")) return;
+
+            members = [];
+            expenses = [];
+
+            saveData();
+            renderAll();
+        }
+
+        document.getElementById("memberName").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") addMember();
+        });
+
+        document.getElementById("expenseAmount").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") addExpense();
+        });
+
+        renderAll();
+    </script>
+
+</body>
+
+</html>
